@@ -7,12 +7,22 @@ const vectShaderText = `
 attribute vec4 a_position;
 // 所有着色器都有一个main方法
 void main() {
-
     // gl_Position 是一个顶点着色器主要设置的变量
     gl_Position = a_position;
 }`;
 
-
+const transformDatumVertexShaderText = `
+// 一个属性变量，将会从缓冲中获取数据
+attribute vec2 a_position;
+uniform vec2 u_resolution;
+// 所有着色器都有一个main方法
+void main() {
+    // gl_Position 是一个顶点着色器主要设置的变量
+    vec2 zeroToOne = a_position / u_resolution;
+    vec2 zeroToTwo = zeroToOne * 2.0;
+    vec2 clipSpace = zeroToTwo - 1.0;
+    gl_Position = vec4(clipSpace, 0, 0);
+}`;
 
 // fragment shader
 const fragShaderText = `
@@ -22,16 +32,14 @@ void main() {
 gl_FragColor = vec4(0, 0.5, 1, 0.5); // 返回“瑞迪施紫色”
 }`;
 
-
-
-
-var vertexShader = createShader(gl, gl.VERTEX_SHADER, vectShaderText);
+var vertexShader = createShader(gl, gl.VERTEX_SHADER, transformDatumVertexShaderText);
 var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragShaderText);
 var program = createProgram(gl, vertexShader, fragmentShader);
 
-// 找到GLSL属性a_position
+// 找到GLSL属性a_position，变量u_resolution
 
 var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+var resolutionUiformLocation = gl.getUniformLocation(program, "u_resolution");
 
 // 属性值从缓冲中获取数据，所以我们创建一个缓冲
 var positionBuffer = gl.createBuffer();
@@ -42,12 +50,11 @@ gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 // 通过绑定点想缓冲中存放数据
 var positions = [
   0, 0,
-   1, 0,
-    1, 1,
-    0,0,
-    0,1,
-    1,1
-  ];
+   10, 10,
+    5, 5,
+     0, 0,
+      0, 1,
+       1, 1];
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
 // ========以上代码属于初始代码，仅在页面加载时运行一次=================
@@ -59,7 +66,7 @@ gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 gl.clearColor(0, 0, 0, 0);
 gl.clear(gl.COLOR_BUFFER_BIT);
 gl.useProgram(program);
-
+gl.uniform2f(resolutionUiformLocation, gl.canvas.width, gl.canvas.height);
 // 接下来需要告诉WebGL怎么从之前准备的缓冲中获取数据给着色器中的属性。
 
 // 启用对应属性

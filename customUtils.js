@@ -3,10 +3,10 @@ function createShader(gl, type, source) {
   gl.shaderSource(shader, source); // 提供数据源
   gl.compileShader(shader); // 编译 -> 生成着色器
   var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-  console.log(gl.getShaderInfoLog(shader));
   if (success) {
     return shader;
   }
+  console.log(gl.getShaderInfoLog(shader));
   gl.deleteShader(shader);
 }
 
