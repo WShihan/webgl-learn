@@ -23,3 +23,8 @@ function createProgram(gl, vertexShader, fragmentShader) {
   console.log(gl.getProgramInfoLog(program));
   gl.deleteProgram(program);
 }
+
+// 返回 0 到 range 范围内的随机整数
+function randomInt(range) {
+  return Math.floor(Math.random() * range);
+}
